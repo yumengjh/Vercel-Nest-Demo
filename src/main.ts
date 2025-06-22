@@ -17,6 +17,9 @@ export async function bootstrap(): Promise<INestApplication> {
       credentials: true,
     });
 
+
+    // 初始化应用，确保所有模块、依赖注入容器和生命周期钩子都已正确设置
+    // 这一步对于确保应用在 Vercel 环境下正常工作至关重要
     await app.init();
     cachedApp = app;
   }

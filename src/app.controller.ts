@@ -1,10 +1,11 @@
-import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query } from '@nestjs/common';
+import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Request } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 @Controller("cats")
 export class AppController {
   constructor(private readonly appService: AppService) { }
+
 
   @Get("breed")
   getHello(@Query() query: any): string {
@@ -12,26 +13,17 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('breed/*')
-  @HttpCode(204)
-  @Header('Cache-Control', 'no-store')
-  @Redirect('https://nest.nodejs.cn')
-  create(): string {
-    return 'This action adds a new cat';
+  @Get('page/:id')
+  findOne(@Param() params: any): string {
+    console.log(params.id);
+    return `This action returns a #${params.id} cat`;
   }
 
-  @Get('docs')
-  @Redirect('https://nest.nodejs.cn', 302)
-  getDocs(@Query('version') version) {
-    if (version && version === '5') {
-      return { url: 'https://nest.nodejs.cn/v5/' };
-    }
-  }
 
   @Get('init')
   getInitInfo(@Req() request: Request) {
     return {
-      status: 'ok',
+      status: '❤',
       env: process.env.NODE_ENV || 'unknown',
       vercel: !!process.env.VERCEL,
       ip: request.ip,
