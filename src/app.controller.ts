@@ -2,37 +2,23 @@ import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Re
 import { AppService } from './app.service';
 import { Request, Response, NextFunction } from 'express';
 
-@Controller("cats")
+@Controller("test")
 export class AppController {
   constructor(private readonly appService: AppService) { }
 
 
-  @Get("breed")
+  @Get("a1")
   getHello(@Query() query: any): string {
-    console.log('Query parameters:', query);
+    // console.log('Query parameters:', query);
     return this.appService.getHello();
   }
 
-  @Get('page/:id')
+  @Get('a2/:id')
   findOne(@Param() params: any): string {
     console.log(params.id);
     return `This action returns a #${params.id} cat`;
   }
 
 
-  @Get('init')
-  getInitInfo(@Req() request: Request) {
-    return {
-      status: '❤',
-      env: process.env.NODE_ENV || 'unknown',
-      vercel: !!process.env.VERCEL,
-      ip: request.ip,
-      'x-forwarded-for': request.headers['x-forwarded-for'] || null,
-      timestamp: new Date().toISOString(),
-      version: '1.0.0',
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-    };
-  }
 }
 
