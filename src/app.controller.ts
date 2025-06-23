@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse } from '@nestjs/common';
+import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Request, Response, NextFunction } from 'express';
 
@@ -21,4 +21,3 @@ export class AppController {
 
 
 }
-

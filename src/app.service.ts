@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class AppService {
+  private count = 0; // 全局共享状态
   getHello(): string {
-    return '<h1>Hello World!</h1>';
+    return ++this.count + "";
   }
 }
