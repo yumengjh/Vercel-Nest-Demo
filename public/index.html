@@ -19,7 +19,14 @@
   <div id="app" v-cloak>
     <h1>公告: {{ name }} </h1>
   </div>
-  <script src="/main.js" type="module"></script>
+  <script src="./assets/mist.iife.js"></script>
+  <script>
+    const app = Mist.createApp({
+      name: "鱼梦江湖"
+    })
+    app.mount("#app")
+  </script>
+  <!-- <script src="/main.js" type="module"></script> -->
 </body>
 
 </html>
