@@ -10,6 +10,8 @@ import { InitController } from './init/init.controller';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // 指向 public 目录
       // exclude: ['/api'], // 正确写法，排除所有 /api 路由
+      serveRoot: '/', // 静态资源根路径
+      exclude: ['*'], // 排除所有路由，只有真实静态资源才会被处理
     }),
   ],
   controllers: [AppController, InitController],
