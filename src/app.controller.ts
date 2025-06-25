@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
+import { HttpException, HttpStatus, Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Request, Response, NextFunction } from 'express';
 import { Observable, of } from 'rxjs';
@@ -16,6 +16,8 @@ export class CreateCatDto {
   @IsInt() age: number;
   @IsString() breed: string;
 }
+
+
 
 @Controller("test")
 export class AppController {
@@ -60,8 +62,13 @@ export class AppController {
   }
 
   @Get('a6')
-  demo6(@Query('name') name: string, @Query('age') age: number) {
-    return `你的姓名是${name}，年龄是${age}`
+  async demo6() {
+    return this.appService.demo6()
+    // try {
+    //   return this.appService.demo6()
+    // } catch (error) {
+    //   throw new ForbiddenException
+    // }
   }
 }
 

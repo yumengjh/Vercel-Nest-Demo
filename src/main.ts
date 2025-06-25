@@ -2,6 +2,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import { join } from 'path';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 let cachedApp: INestApplication;
 
@@ -28,6 +31,28 @@ export async function bootstrap(): Promise<INestApplication> {
         enableImplicitConversion: true, // 启用隐式类型转换(允许不写 显式装饰器 也能根据类型推断自动转换)
       },
     }));
+
+
+    // app.useGlobalFilters(new AllExceptionsFilter());
+
+    // 静态资源 gzip 支持
+    app.use('/assets', (req, res, next) => {
+      if (req.url.endsWith('.gz')) {
+        // 设置正确的 Content-Encoding
+        res.set('Content-Encoding', 'gzip');
+        // 根据文件类型设置 Content-Type
+        if (req.url.endsWith('.js.gz')) {
+          res.set('Content-Type', 'application/javascript');
+        } else if (req.url.endsWith('.css.gz')) {
+          res.set('Content-Type', 'text/css');
+        } else if (req.url.endsWith('.json.gz')) {
+          res.set('Content-Type', 'application/json');
+        }
+        // 你可以根据需要添加更多类型
+      }
+      next();
+    });
+    app.use('/assets', express.static(join(__dirname, '..', 'public/assets')));
 
     // 初始化应用，确保所有模块、依赖注入容器和生命周期钩子都已正确设置
     // 这一步对于确保应用在 Vercel 环境下正常工作至关重要
