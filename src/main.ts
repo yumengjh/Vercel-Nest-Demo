@@ -35,6 +35,10 @@ export async function bootstrap(): Promise<INestApplication> {
 
     // app.useGlobalFilters(new AllExceptionsFilter());
 
+    // 修复：INestApplication 没有 disable 方法，需通过 Express 实例关闭 x-powered-by
+    const expressApp = app.getHttpAdapter().getInstance();
+    expressApp.disable('x-powered-by');
+
     // 静态资源 gzip 支持
     app.use('/assets', (req, res, next) => {
       if (req.url.endsWith('.gz')) {

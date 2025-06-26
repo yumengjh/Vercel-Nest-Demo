@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InitController } from './init/init.controller';
+import { SecurityMiddleware } from './middlewares/security.middleware';
 
 @Module({
   imports: [
@@ -17,4 +18,10 @@ import { InitController } from './init/init.controller';
   controllers: [AppController, InitController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
+// 动态移除，目前暂时先使用 app.disable('x-powered-by');
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(SecurityMiddleware).forRoutes('*');
+//   }
+// }

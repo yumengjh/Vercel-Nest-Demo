@@ -1,5 +1,5 @@
 import { Injectable, Scope, HttpException, HttpStatus } from '@nestjs/common';
-import { RateLimitExceededException } from './exceptions/rateLimit-exceeded.exception'
+import { RateLimitExceededException } from './exceptions/'
 
 @Injectable({ scope: Scope.DEFAULT })
 export class AppService {
