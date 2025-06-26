@@ -1,10 +1,15 @@
-import { Injectable, Scope, HttpException, HttpStatus } from '@nestjs/common';
-import { RateLimitExceededException } from './exceptions/'
+import { Injectable, Scope, HttpException, HttpStatus,ImATeapotException } from '@nestjs/common';
+import { RateLimitExceededException,ForbiddenException } from './exceptions/'
 
 @Injectable({ scope: Scope.DEFAULT })
 export class AppService {
   private count = 0; // 全局共享状态
   getHello(): string {
+    throw new ImATeapotException('我是一个彩蛋',{
+      cause: new Error('彩蛋信息'),
+      description:'彩蛋的描述信息'
+    })
+    throw new Error("服务器发生未知错误！")
     return ++this.count + "";
   }
   /**

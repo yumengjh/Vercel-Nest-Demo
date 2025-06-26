@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { join } from 'path';
-// import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HttpExceptionFilter } from './common/filters/all-exceptions.filter';
 
 let cachedApp: INestApplication;
 
@@ -33,7 +33,7 @@ export async function bootstrap(): Promise<INestApplication> {
     }));
 
 
-    // app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     // 修复：INestApplication 没有 disable 方法，需通过 Express 实例关闭 x-powered-by
     // const expressApp = app.getHttpAdapter().getInstance();

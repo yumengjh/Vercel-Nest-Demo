@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "devv": "cross-env VERCEL=1 vercel dev",
-    "dev": "nest start --watch",
+    "dev": "cross-env NODE_ENV=development nest start --watch",
     "preview": "node dist/main",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
