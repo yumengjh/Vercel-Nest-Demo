@@ -18,10 +18,10 @@ import { SecurityMiddleware } from './middlewares/security.middleware';
   controllers: [AppController, InitController],
   providers: [AppService],
 })
-export class AppModule { }
+// export class AppModule { }
 // 动态移除，目前暂时先使用 app.disable('x-powered-by');
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(SecurityMiddleware).forRoutes('*');
-//   }
-// }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityMiddleware).forRoutes('*');
+  }
+}
