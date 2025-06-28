@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InitController } from './init/init.controller';
 import { SecurityMiddleware } from './middlewares/security.middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './common/filters/all-exceptions.filter'
 
 @Module({
   imports: [
@@ -16,7 +18,10 @@ import { SecurityMiddleware } from './middlewares/security.middleware';
     }),
   ],
   controllers: [AppController, InitController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_FILTER,
+    useClass: HttpExceptionFilter,
+  }],
 })
 // export class AppModule { }
 // 动态移除，目前暂时先使用 app.disable('x-powered-by');

@@ -10,7 +10,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 @Catch()
-export class HttpExceptionFilter implements ExceptionFilter {
+export class HttpExceptionFilter implements ExceptionFilter<unknown> {
     private readonly logDir = path.join(process.cwd(), 'logs');
     private readonly logFile = path.join(this.logDir, 'errors.json');
 
