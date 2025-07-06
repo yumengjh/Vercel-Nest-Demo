@@ -122,7 +122,8 @@ export class ImageProxyController {
   @Post('config/refresh')
   async refreshConfig() {
     try {
-      await this.appConfigService.loadAllowedDomains();
+      // 清除缓存并重新加载
+      await this.appConfigService.clearCacheAndReload();
       return {
         success: true,
         message: '配置刷新成功',

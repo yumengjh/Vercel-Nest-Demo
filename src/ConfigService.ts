@@ -69,4 +69,12 @@ export class AppConfigService implements OnModuleInit {
     }
 
     // 你可以再加个定时刷新配置的方法，比如每5分钟自动更新
+    // 清除缓存并重新加载配置
+    async clearCacheAndReload(): Promise<void> {
+        console.log('🧹 清除缓存并重新加载配置...');
+        // 清空当前配置
+        this.allowedDomains = [];
+        // 重新加载
+        await this.loadAllowedDomains();
+    }
 }
