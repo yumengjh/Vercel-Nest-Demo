@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
+import { Scope, HttpException, HttpStatus, Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Request, Response, NextFunction } from 'express';
 import { Observable, of } from 'rxjs';
@@ -19,9 +19,13 @@ export class CreateCatDto {
 
 
 
-@Controller("test")
+@Controller({
+  path: 'test',
+  scope: Scope.DEFAULT,
+})
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {
+  }
 
 
   @Get("a1")
@@ -30,45 +34,14 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('a2/:id')
-  findOne(@Param() params: any): string {
-    console.log(params.id);
-    return `This action returns a #${params.id} cat`;
-  }
 
-
-  @Get('a3')
-  async getData(@Query("name") name: string): Promise<DataResult> {
-    return new Promise(resolve => {
-      setTimeout(() => resolve({
-        name: name || 'Yumengjianghu',
-        status: 1,
-      }), 3000);
-    });
-  }
-
-
-  @Get('a4')
-  findAll(): Observable<any[]> {
-    return of([
-      { id: 1, name: '张三' },
-      { id: 2, name: '李四' },
-    ]);
-  }
 
   @Post('a5')
   demo(@Body() createCatDto: CreateCatDto) {
     return createCatDto
   }
 
-  @Get('a6')
-  async demo6() {
-    return this.appService.demo6()
-    // try {
-    //   return this.appService.demo6()
-    // } catch (error) {
-    //   throw new ForbiddenException
-    // }
-  }
 }
+
+
 
