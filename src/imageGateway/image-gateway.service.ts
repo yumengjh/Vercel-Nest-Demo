@@ -17,7 +17,9 @@ export class AppService {
 
       // 设置响应头
       res.setHeader('Content-Type', response.headers['content-type'] || 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=3600'); // 缓存1小时
+      // 为图片设置适当的缓存策略，但确保验证失败不会被缓存
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600'); // 缓存1小时
+      res.setHeader('Vary', 'Referer'); // 根据Referer变化缓存
 
       // 直接把图片流返回给前端
       response.data.pipe(res);

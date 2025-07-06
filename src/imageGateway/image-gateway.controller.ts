@@ -1,8 +1,7 @@
 import { Controller, Get, Post, Req, Res, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './image-gateway.service';
 import { Request, Response } from 'express';
-import { AppConfigService } from '../ConfigService';
-import { log } from 'console';
+import { AppConfigService, IPWhitelistService } from '../ConfigService';
 
 // 图片代理控制器
 @Controller('image')
@@ -11,7 +10,8 @@ export class ImageProxyController {
 
   constructor(
     private readonly appService: AppService,
-    private readonly appConfigService: AppConfigService
+    private readonly appConfigService: AppConfigService,
+    private readonly ipWhitelistService: IPWhitelistService
   ) { }
 
   // 动态获取允许的域名列表
@@ -20,17 +20,10 @@ export class ImageProxyController {
   }
 
   // IP 白名单列表
-  private readonly allowedIPs = [
-    // '127.0.0.1',        // 本地回环
-    // '::1',              // IPv6 本地回环
-    // '192.168.1.100',    // 你的局域网 IP
-    // '192.168.220.1',    // 你的局域网 IP（根据之前的信息）
-    // '10.0.0.0/8',       // 内网段
-    // '172.16.0.0/12',    // 内网段
-    // '192.168.0.0/16',   // 内网段
-    // 你可以添加更多 IP 或 IP 段
-    '*'
-  ];
+  // 动态获取 IP 白名单列表
+  private get allowedIPs(): string[] {
+    return this.ipWhitelistService.getAllowedIPs();
+  }
 
   // 验证 IP 地址
   private validateIP(ip: string): boolean {
@@ -84,10 +77,8 @@ export class ImageProxyController {
 
   // 验证 Referer
   private validateReferer(referer: string): boolean {
-
     if (!referer) {
-      return true
-      return false; // 没有 Referer 直接拒绝
+      return true; // 没有 Referer 允许访问
     }
 
     try {
@@ -107,6 +98,36 @@ export class ImageProxyController {
     }
   }
 
+  // 统一的验证函数
+  private validateRequest(req: Request, res: Response, token?: string): void {
+    // 1. 校验token
+    if (token && token !== this.token) {
+      this.setNoCacheHeaders(res);
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    // 2. 校验 IP 地址
+    const realIP = this.getRealIP(req);
+    if (!this.validateIP(realIP)) {
+      this.setNoCacheHeaders(res);
+      throw new HttpException('IP not allowed', HttpStatus.FORBIDDEN);
+    }
+
+    // 3. 校验 Referer
+    const referer = req.headers.referer || req.headers.referrer;
+    if (!this.validateReferer(referer as string)) {
+      this.setNoCacheHeaders(res);
+      throw new HttpException('Invalid Referer', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  // 设置不缓存响应头
+  private setNoCacheHeaders(res: Response): void {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+
   // 配置管理接口
   @Get('config/domains')
   async getCurrentDomains() {
@@ -119,16 +140,32 @@ export class ImageProxyController {
     };
   }
 
+  @Get('config/ips')
+  async getCurrentIPs() {
+    return {
+      success: true,
+      data: {
+        allowedIPs: this.allowedIPs,
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+
   @Post('config/refresh')
   async refreshConfig() {
     try {
-      // 清除缓存并重新加载
-      await this.appConfigService.clearCacheAndReload();
+      // 清除缓存并重新加载所有配置
+      await Promise.all([
+        this.appConfigService.clearCacheAndReload(),
+        this.ipWhitelistService.clearCacheAndReload()
+      ]);
+
       return {
         success: true,
         message: '配置刷新成功',
         data: {
           allowedDomains: this.allowedDomains,
+          allowedIPs: this.allowedIPs,
           timestamp: new Date().toISOString()
         }
       };
@@ -139,6 +176,57 @@ export class ImageProxyController {
         message: '配置刷新失败，使用默认配置',
         data: {
           allowedDomains: this.allowedDomains,
+          allowedIPs: this.allowedIPs,
+          timestamp: new Date().toISOString()
+        }
+      };
+    }
+  }
+
+  @Post('config/refresh/domains')
+  async refreshDomainsConfig() {
+    try {
+      await this.appConfigService.clearCacheAndReload();
+      return {
+        success: true,
+        message: '域名配置刷新成功',
+        data: {
+          allowedDomains: this.allowedDomains,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('域名配置刷新失败:', error);
+      return {
+        success: false,
+        message: '域名配置刷新失败，使用默认配置',
+        data: {
+          allowedDomains: this.allowedDomains,
+          timestamp: new Date().toISOString()
+        }
+      };
+    }
+  }
+
+  @Post('config/refresh/ips')
+  async refreshIPsConfig() {
+    try {
+      await this.ipWhitelistService.clearCacheAndReload();
+      return {
+        success: true,
+        message: 'IP白名单配置刷新成功',
+        data: {
+          allowedIPs: this.allowedIPs,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('IP白名单配置刷新失败:', error);
+      return {
+        success: false,
+        message: 'IP白名单配置刷新失败，使用默认配置',
+        data: {
+          allowedIPs: this.allowedIPs,
           timestamp: new Date().toISOString()
         }
       };
@@ -152,30 +240,13 @@ export class ImageProxyController {
     @Res() res: Response,
     @Query('token') token: string
   ) {
-    // 1. 校验token
-    // 如果没有token则跳过验证，有token则进行验证
-    if (token && token !== this.token) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    // 统一验证请求
+    this.validateRequest(req, res, token);
 
-    // 2. 校验 IP 地址
-    const realIP = this.getRealIP(req);
-    // console.log('Client IP:', realIP);
-    if (!this.validateIP(realIP)) {
-      throw new HttpException('IP not allowed', HttpStatus.FORBIDDEN);
-    }
-
-    // 3. 校验 Referer
-    const referer = req.headers.referer || req.headers.referrer;
-    // console.log('Referer:', referer);
-    if (!this.validateReferer(referer as string)) {
-      throw new HttpException('Invalid Referer', HttpStatus.FORBIDDEN);
-    }
-
-    // 4. 获取原始图片路径（去掉 /image/ 前缀）
+    // 获取原始图片路径（去掉 /image/ 前缀）
     const imgPath = req.path.replace(/^\/image\//, '');
 
-    // 5. 代理图片
+    // 代理图片
     return this.appService.proxyImage(imgPath, res);
   }
 
@@ -186,29 +257,13 @@ export class ImageProxyController {
     @Res() res: Response,
     @Query('token') token: string
   ) {
-    // 1. 校验token
-    if (!token || token !== this.token) {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
+    // 统一验证请求
+    this.validateRequest(req, res, token);
 
-    // 2. 校验 IP 地址
-    const realIP = this.getRealIP(req);
-    console.log('Client IP:', realIP);
-    if (!this.validateIP(realIP)) {
-      throw new HttpException('IP not allowed', HttpStatus.FORBIDDEN);
-    }
-
-    // 3. 校验 Referer
-    const referer = req.headers.referer || req.headers.referrer;
-    console.log('Referer:', referer);
-    if (!this.validateReferer(referer as string)) {
-      throw new HttpException('Invalid Referer', HttpStatus.FORBIDDEN);
-    }
-
-    // 4. 获取原始图片路径（去掉 /image/ 前缀）
+    // 获取原始图片路径（去掉 /image/ 前缀）
     const imgPath = req.path.replace(/^\/image\//, '');
 
-    // 5. 代理图片
+    // 代理图片
     return this.appService.proxyImage(imgPath, res);
   }
 }
