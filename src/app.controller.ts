@@ -51,6 +51,26 @@ export class AppController {
     return createCatDto
   }
 
+  @Get('a6')
+  @HandleSupabaseQuery({
+    successMessage: '获取励志语录成功',
+    errorMessage: '获取励志语录失败',
+    defaultErrorStatus: HttpStatus.BAD_REQUEST
+  })
+  @Throttle({
+    wait: 2000,  // 2秒内只能调用一次
+    errorMessage: '查询操作太频繁，请稍后再试',
+    errorStatus: HttpStatus.TOO_MANY_REQUESTS
+  })
+  async getRandomQuote() {
+    // 生成1到100之间的随机ID（假设数据库中有100条记录）
+    const randomId = Math.floor(Math.random() * 100) + 1;
+
+    return await this.supabaseQueryService.executeSQL<AppConfig>(
+      `SELECT id, quote FROM motivational_quotes WHERE enable = true AND id = ${randomId}`
+    );
+  }
+
   @Get('config')
   @Throttle({
     wait: 2000,  // 2秒内只能调用一次
@@ -87,7 +107,7 @@ export class AppController {
   })
   async getSpecificFields(@Query("key") key?: string, @Query("id") id?: number) {
     let sql: string;
-    
+
     if (id) {
       // 有ID就用ID
       sql = `DELETE FROM app_config WHERE id = ${id}`;
@@ -98,7 +118,7 @@ export class AppController {
       // 都没有就抛出错误
       throw new HttpException('必须提供key或id参数', HttpStatus.BAD_REQUEST);
     }
-    
+
     return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
   }
 
