@@ -9,6 +9,7 @@ import { SecurityMiddleware } from './middlewares/security.middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/all-exceptions.filter';
 import { ImageGatewayModule } from './imageGateway/image-gateway.module';
+import { SupabaseQueryService } from './databaseOperation';
 
 @Module({
   imports: [
@@ -23,13 +24,14 @@ import { ImageGatewayModule } from './imageGateway/image-gateway.module';
       serveRoot: '/', // 静态资源根路径
       exclude: ['*'], // 排除所有路由，只有真实静态资源才会被处理
     }),
-    ImageGatewayModule, // 引入图片网关模块
+    // ImageGatewayModule, // 引入图片网关模块
   ],
   controllers: [AppController, InitController],
   providers: [AppService, {
     provide: APP_FILTER,
     useClass: HttpExceptionFilter,
-  }],
+  },
+    SupabaseQueryService],
 })
 // export class AppModule { }
 // 动态移除，目前暂时先使用 app.disable('x-powered-by');

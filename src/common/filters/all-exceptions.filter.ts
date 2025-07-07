@@ -121,7 +121,7 @@ export class HttpExceptionFilter implements ExceptionFilter<unknown> {
             path: errorInfo.path,
             message: errorInfo.message,
             ...(errorInfo.error && { error: errorInfo.error }),
-            ...(process.env.NODE_ENV === 'development' && { stack: errorInfo.stack }),
+            ...(process.env.NODE_ENV === 'dev' && { stack: errorInfo.stack }),
         });
     }
 }
