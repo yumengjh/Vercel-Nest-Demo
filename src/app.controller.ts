@@ -4,12 +4,14 @@ import { Request, Response, NextFunction } from 'express';
 import { Observable, of } from 'rxjs';
 import { IsString, IsInt } from 'class-validator';
 import { SupabaseQueryService } from './databaseOperation';
+import { HandleSupabaseQuery } from './decorators/supabase-handler.decorator';
+import { Throttle, Debounce } from './decorators/throttle-debounce.decorator';
 
 // 定义配置项接口
 interface AppConfig {
-  id: number;
-  key: string;
-  value: string;
+  id?: number;
+  key?: string;
+  value?: string;
   description?: string;
   created_at?: Date;
   updated_at?: Date;
@@ -32,7 +34,10 @@ export class CreateCatDto {
   scope: Scope.DEFAULT,
 })
 export class AppController {
-  constructor(private readonly appService: AppService, private readonly supabaseQueryService: SupabaseQueryService) {
+  constructor(
+    private readonly appService: AppService,
+    private readonly supabaseQueryService: SupabaseQueryService
+  ) {
   }
 
   @Get("a1")
@@ -46,79 +51,55 @@ export class AppController {
     return createCatDto
   }
 
-  @Get('a6')
-  async getAppConfig() {
-    try {
-      // 先使用简单的查询，然后逐步测试复杂查询
-      const result = await this.supabaseQueryService.executeSQL<AppConfig>(
-        'SELECT value FROM app_config where key = "image_token" ORDER BY id ASC'
-      );
-
-      if (result.error) {
-        throw new HttpException(result.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      return {
-        success: true,
-        data: result.data,
-        message: '操作成功'
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message || '操作失败',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+  @Get('config')
+  @Throttle({
+    wait: 2000,  // 2秒内只能调用一次
+    errorMessage: '查询操作太频繁，请稍后再试',
+    errorStatus: HttpStatus.TOO_MANY_REQUESTS
+  })
+  @HandleSupabaseQuery({
+    successMessage: '获取配置成功',
+    errorMessage: '获取配置失败',
+    defaultErrorStatus: HttpStatus.BAD_REQUEST
+  })
+  async getAppConfig(@Query("key") key: string = 'default_key') {
+    return await this.supabaseQueryService.executeSQL<AppConfig>(
+      `SELECT * FROM app_config where key = '${key}' ORDER BY id ASC`
+    );
   }
 
-  @Get('a7')
-  async getFilteredConfig(@Query('key') key?: string) {
-    try {
-      let sql = "insert into app_config (key, value, description) values ('test', 'test', 'test')";
-
-      const result = await this.supabaseQueryService.executeSQL<AppConfig>(sql);
-
-      if (result.error) {
-        throw new HttpException(result.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      return {
-        success: true,
-        data: result.data,
-        message: '操作成功'
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message || '操作失败',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+  @Get('insert')
+  @HandleSupabaseQuery({
+    successMessage: '操作成功',
+    errorMessage: '操作失败',
+    defaultErrorStatus: HttpStatus.BAD_REQUEST
+  })
+  async getFilteredConfig(@Query('key') key: string = 'default_key', @Query('value') value: string = 'default_value', @Query('description') description: string = 'default_description') {
+    let sql = `INSERT INTO app_config (key, value, description) VALUES ('${key}', '${value}', '${description}')`;
+    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
   }
 
-  // 添加一个测试指定字段查询的接口
-  @Get('a8')
-  async getSpecificFields() {
-    try {
-      // 测试指定字段的查询
-      const result = await this.supabaseQueryService.executeSQL<AppConfig>(
-        'SELECT id, key, value FROM app_config ORDER BY id ASC'
-      );
-
-      if (result.error) {
-        throw new HttpException(result.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      return {
-        success: true,
-        data: result.data,
-        message: '获取指定字段成功'
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message || '查询失败',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+  @Get('delete')
+  @HandleSupabaseQuery({
+    successMessage: '删除成功',
+    errorMessage: '删除失败',
+    defaultErrorStatus: HttpStatus.BAD_REQUEST
+  })
+  async getSpecificFields(@Query("key") key?: string, @Query("id") id?: number) {
+    let sql: string;
+    
+    if (id) {
+      // 有ID就用ID
+      sql = `DELETE FROM app_config WHERE id = ${id}`;
+    } else if (key) {
+      // 没有ID但有key就用key
+      sql = `DELETE FROM app_config WHERE key = '${key}'`;
+    } else {
+      // 都没有就抛出错误
+      throw new HttpException('必须提供key或id参数', HttpStatus.BAD_REQUEST);
     }
+    
+    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
   }
 
 }

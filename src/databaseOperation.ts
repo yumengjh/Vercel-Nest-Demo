@@ -19,6 +19,16 @@ export class SupabaseQueryService {
     this.parser = new Parser();
   }
 
+  private handleError(message: string, statusCode?: number) {
+    return { 
+      data: null, 
+      error: { 
+        message: message || 'Failed to execute query',
+        statusCode
+      } 
+    };
+  }
+
   /**
    * 执行 MySQL 风格的 SQL 查询，转换为 Supabase API 调用
    * @param sqlQuery MySQL 风格的 SQL 语句
@@ -94,12 +104,7 @@ export class SupabaseQueryService {
       }
       
       console.error('SQL Parse/Execute Error:', error.message);
-      return { 
-        data: null, 
-        error: { 
-          message: error.message || 'Failed to execute query'
-        } 
-      };
+      return this.handleError(error.message);
     }
   }
 
@@ -432,12 +437,7 @@ export class SupabaseQueryService {
 
       return { data, error };
     } catch (error) {
-      return { 
-        data: null, 
-        error: { 
-          message: error.message || 'Failed to execute simple insert'
-        } 
-      };
+      return this.handleError(error.message || 'Failed to execute simple insert', 400);
     }
   }
 
@@ -541,12 +541,7 @@ export class SupabaseQueryService {
       const { data, error } = await query.select();
       return { data, error };
     } catch (error) {
-      return { 
-        data: null, 
-        error: { 
-          message: error.message || 'Failed to execute simple update'
-        } 
-      };
+      return this.handleError(error.message || 'Failed to execute simple update', 400);
     }
   }
 
@@ -604,12 +599,7 @@ export class SupabaseQueryService {
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
-      return { 
-        data: null, 
-        error: { 
-          message: error.message || 'Failed to execute simple delete'
-        } 
-      };
+      return this.handleError(error.message || 'Failed to execute simple delete', 400);
     }
   }
 
@@ -651,12 +641,7 @@ export class SupabaseQueryService {
       const { data, error } = await query;
       return { data, error };
     } catch (error) {
-      return { 
-        data: null, 
-        error: { 
-          message: error.message || 'Failed to execute simple query'
-        } 
-      };
+      return this.handleError(error.message || 'Failed to execute simple query', 400);
     }
   }
 
