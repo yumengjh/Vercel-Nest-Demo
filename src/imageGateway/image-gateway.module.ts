@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ImageProxyController } from './image-gateway.controller';
 import { AppService } from './image-gateway.service';
-import { AppConfigService, IPWhitelistService } from '../ConfigService';
+import { AppConfigService, IPWhitelistService } from './ConfigService';
 
 @Module({
   controllers: [ImageProxyController],

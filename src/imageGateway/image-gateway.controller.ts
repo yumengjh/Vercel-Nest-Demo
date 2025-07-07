@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Req, Res, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './image-gateway.service';
 import { Request, Response } from 'express';
-import { AppConfigService, IPWhitelistService } from '../ConfigService';
+import { AppConfigService, IPWhitelistService } from './ConfigService';
 
 // 图片代理控制器
 @Controller('image')
