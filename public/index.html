@@ -4,29 +4,294 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鱼梦江湖</title>
+  <title>鱼梦江湖 - 登录</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/style.css">
   <style>
     [v-cloak] {
       opacity: 0;
     }
+
+    .page-container {
+      min-height: 100vh;
+      background: #f0f2f5;
+      background-image: url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg');
+      background-repeat: no-repeat;
+      background-position: center 110px;
+      background-size: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-top: 10vh;
+      align-items: center;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .login-header h1 {
+      font-weight: bold;
+      font-size: 33px;
+      color: rgba(0, 0, 0, 0.85);
+      font-family: Avenir, -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+    }
+
+    .login-header p {
+      margin-top: 12px;
+      margin-bottom: 40px;
+      color: rgba(0, 0, 0, 0.45);
+      font-size: 14px;
+    }
+
+    .login-container {
+      width: 368px;
+      margin: 0 auto;
+      padding: 24px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group input {
+      width: 100%;
+      height: 40px;
+      padding: 4px 11px;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 14px;
+      line-height: 1.5715;
+      background-color: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .form-group input:hover {
+      border-color: #40a9ff;
+    }
+
+    .form-group input:focus {
+      border-color: #40a9ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      outline: none;
+    }
+
+    .form-group input::placeholder {
+      color: rgba(0, 0, 0, 0.25);
+    }
+
+    .btn {
+      width: 100%;
+      height: 40px;
+      padding: 6.4px 15px;
+      font-size: 14px;
+      border-radius: 2px;
+      border: 1px solid transparent;
+      color: #fff;
+      background: #1890ff;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: #40a9ff;
+    }
+
+    .btn:active {
+      background: #096dd9;
+    }
+
+    .btn:disabled {
+      background: #f5f5f5;
+      border-color: #d9d9d9;
+      color: rgba(0, 0, 0, 0.25);
+      cursor: not-allowed;
+      text-shadow: none;
+      box-shadow: none;
+    }
+
+    .error-message {
+      color: #ff4d4f;
+      font-size: 14px;
+      line-height: 1.5715;
+      margin-top: 8px;
+      transition: color 0.3s;
+    }
+
+    .success-message {
+      color: #52c41a;
+      font-size: 14px;
+      line-height: 1.5715;
+      margin-top: 8px;
+      transition: color 0.3s;
+    }
+
+    .login-footer {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .login-footer a {
+      color: #1890ff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .login-footer a:hover {
+      color: #40a9ff;
+    }
+
+    .input-prefix-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(0, 0, 0, 0.25);
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .form-group input {
+      padding-left: 36px;
+    }
+
+    /* 添加图标样式 */
+    .icon {
+      width: 14px;
+      height: 14px;
+      fill: rgba(0, 0, 0, 0.25);
+    }
   </style>
 </head>
 
 <body>
-  <h1>本页面由Vercel托管，使用Nest.js框架，部署使用Vercel Serverless functions</h1>
   <div id="app" v-cloak>
-    <h1>公告: {{ name }} </h1>
+    <div class="page-container" v-if="!isLogin">
+      <div class="login-header">
+        <h1 style="font-weight: normal;">鱼梦江湖</h1>
+        <p>欢迎使用鱼梦江湖管理系统</p>
+      </div>
+      <div class="login-container">
+        <form @submit.prevent="handleLogin" @vue:mounted="validateForm">
+          <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="64 64 896 896" focusable="false" data-icon="user">
+              <path d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z"></path>
+            </svg>
+            <input 
+              type="text" 
+              id="username" 
+              v-model="formData.username" 
+              :disabled="loading"
+              @input="validateForm"
+              placeholder="用户名"
+              autocomplete="username"
+            >
+          </div>
+          <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="64 64 896 896" focusable="false" data-icon="lock">
+              <path d="M832 464h-68V240c0-70.7-57.3-128-128-128H388c-70.7 0-128 57.3-128 128v224h-68c-17.7 0-32 14.3-32 32v384c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V496c0-17.7-14.3-32-32-32zM332 240c0-30.9 25.1-56 56-56h248c30.9 0 56 25.1 56 56v224H332V240zm460 600H232V536h560v304zM484 701v53c0 4.4 3.6 8 8 8h40c4.4 0 8-3.6 8-8v-53a48.01 48.01 0 10-56 0z"></path>
+            </svg>
+            <input 
+              type="password" 
+              id="password" 
+              v-model="formData.password" 
+              :disabled="loading"
+              @input="validateForm"
+              placeholder="密码"
+              autocomplete="current-password"
+            >
+          </div>
+          <button 
+            type="submit" 
+            class="btn" 
+            :disabled="!isValid || loading"
+          >
+            {{ loading ? '登录中...' : '登录' }}
+          </button>
+          <div v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+          <div v-if="successMessage" class="success-message">
+            {{ successMessage }}
+          </div>
+        </form>
+        <!-- <div class="login-footer">
+          <a href="#">忘记密码</a> | <a href="#">注册账号</a>
+        </div> -->
+      </div>
+    </div>
+    <div class="page-container" v-if="isLogin">
+      <img src="https://image.yumeng.icu/images/chickenCode.png" width="100%" height="100%"></img>
+    </div>
   </div>
+
   <script src="./assets/mist.iife.js"></script>
   <script>
     const app = Mist.createApp({
-      name: "鱼梦江湖"
-    })
-    app.mount("#app")
+      formData: {
+        username: 'yumeng',
+        password: 'yumengjianghu'
+      },
+      loading: false,
+      errorMessage: '',
+      successMessage: '',
+      isValid: false,
+      isLogin: false,
+
+      validateForm() {
+        this.errorMessage = '';
+        this.isValid = this.formData.username.length >= 1 && this.formData.password.length >= 1;
+      },
+
+      async handleLogin() {
+        if (!this.isValid) return;
+
+        this.loading = true;
+        this.errorMessage = '';
+        this.successMessage = '';
+
+        try {
+          // 这里替换为实际的登录 API 调用
+          const response = await fetch('/test/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.formData)
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || '登录失败');
+          }
+
+          this.successMessage = '登录成功！';
+          this.isLogin = true;
+          // 登录成功后的处理，比如跳转到首页
+          // setTimeout(() => {
+          //   window.location.href = '';
+          // }, 1500);
+
+        } catch (error) {
+          this.errorMessage = error.message || '登录失败，请稍后重试';
+        } finally {
+          this.loading = false;
+        }
+      }
+    });
+
+    app.mount("#app");
   </script>
-  <!-- <script src="/main.js" type="module"></script> -->
 </body>
 
 </html>

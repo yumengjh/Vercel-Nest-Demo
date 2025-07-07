@@ -30,7 +30,7 @@ export class CreateCatDto {
 }
 
 @Controller({
-  path: 'test',
+  path: 'v1',
   scope: Scope.DEFAULT,
 })
 export class AppController {
@@ -51,7 +51,127 @@ export class AppController {
     return createCatDto
   }
 
-  @Get('a6')
+  @Get('userlist')
+  @HandleSupabaseQuery({
+    successMessage: '获取用户列表成功',
+    errorMessage: '获取用户列表失败',
+    defaultErrorStatus: HttpStatus.BAD_REQUEST
+  })
+  async getUserList() {
+    return await this.supabaseQueryService.executeSQL<AppConfig>(
+      `SELECT username FROM users`
+    );
+  }
+
+
+  @Post('register')
+  async register(@Body() body: any, @Req() req: any) {
+    // 1. 字段准备与默认值处理
+    const {
+      username,
+      password,
+      email = null,
+      gender = 'other',   // male, female, other
+      age = null,
+      role = 'user',
+      bio = null,
+      avatar_url = null,
+      phone = null,
+      address = null
+    } = body;
+
+    // 2. 获取注册IP
+    let register_ip = null;
+    if (req && req.ip) {
+      // 兼容 x-forwarded-for
+      register_ip = req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    }
+
+    // 3. 构造SQL
+    // 注意：此处为演示，实际生产环境必须对输入做严格校验和防注入处理
+    const sql = `
+      INSERT INTO users (
+        username, password, email, gender, age, role, is_active, is_banned, bio, avatar_url, phone, register_ip,address
+      ) VALUES (
+        '${username}', 
+        '${password}', 
+        ${email ? `'${email}'` : 'NULL'}, 
+        '${['male', 'female', 'other'].includes(gender) ? gender : 'other'}', 
+        ${age !== null && !isNaN(Number(age)) ? Number(age) : 'NULL'}, 
+        '${['admin', 'editor', 'user'].includes(role) ? role : 'user'}', 
+        true, 
+        false, 
+        ${bio ? `'${bio}'` : 'NULL'}, 
+        ${avatar_url ? `'${avatar_url}'` : 'NULL'}, 
+        ${phone ? `'${phone}'` : 'NULL'}, 
+        ${register_ip ? `'${register_ip}'` : 'NULL'}, 
+        ${address ? `'${address}'` : 'NULL'}
+      )
+    `;
+
+    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
+  }
+
+  @Post('updateUserInfo')
+  async updateUserInfo(@Body() body: any) {
+    let whereClause = '';
+    if (body.uuid) {
+      whereClause = `uuid = '${body.uuid}'`;
+    }
+    else if (body.phone) {
+      whereClause = `phone = '${body.phone}'`;
+    } else if (body.email) {
+      whereClause = `email = '${body.email}'`;
+    } else {
+      // 如果都没有，返回错误
+      throw new HttpException('请提供手机号或邮箱用于更新用户信息', HttpStatus.BAD_REQUEST);
+    }
+
+    // 注意：此处未做SQL注入防护，生产环境请严格校验
+    const sql = `UPDATE users SET ${body.key} = '${body.value}' WHERE ${whereClause}`;
+    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
+  }
+
+
+  @Post('login')
+  @Throttle({
+    wait: 2000,  // 2秒内只能调用一次
+    errorMessage: '登录操作太频繁，请稍后再试',
+    errorStatus: HttpStatus.TOO_MANY_REQUESTS
+  })
+  async login(@Body() body: any, @Req() req: any) {
+    const result = await this.supabaseQueryService.executeSQL<AppConfig>(
+      `SELECT * FROM users WHERE username = '${body.username}' AND password = '${body.password}'`
+    );
+    if (result.data.length > 0) {
+
+      // 登录成功后更新最新IP和登录时间
+      const sql = `UPDATE users SET last_active_ip = '${req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim()}', last_active_at = '${new Date().toISOString()}' WHERE uuid = '${result.data[0].uuid}'`;
+      await this.supabaseQueryService.executeSQL<AppConfig>(sql);
+
+      return {
+        status: 200,
+        message: '登录成功',
+        data: {
+          uuid: result.data[0].uuid,
+          username: result.data[0].username,
+          ip: req.ip || req.headers['x-forwarded-for']?.split(',')[0]?.trim(),
+          last_active_at: new Date().toISOString()
+        }
+      }
+    } else {
+      throw new HttpException('登录失败', HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @Post('deleteUser')
+  async deleteUser(@Body() body: any) {
+    return await this.supabaseQueryService.executeSQL<AppConfig>(
+      `DELETE FROM users WHERE id = ${body.id}`
+    );
+  }
+
+  @Get('quote')
   @HandleSupabaseQuery({
     successMessage: '获取励志语录成功',
     errorMessage: '获取励志语录失败',
