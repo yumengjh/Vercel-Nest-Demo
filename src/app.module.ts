@@ -6,10 +6,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { InitController } from './init/init.controller';
 import { SecurityMiddleware } from './middlewares/security.middleware';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/all-exceptions.filter';
 import { ImageGatewayModule } from './imageGateway/image-gateway.module';
 import { SupabaseQueryService } from './databaseOperation';
+import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -18,20 +20,29 @@ import { SupabaseQueryService } from './databaseOperation';
       envFilePath: '.env', // 指定 .env 文件路径
       cache: true, // 缓存环境变量
     }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET || '3456789sdfghjxcvbn56789cvbn', // 建议使用环境变量
+      signOptions: { expiresIn: '7d' },
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // 指向 public 目录
       // exclude: ['/api'], // 正确写法，排除所有 /api 路由
       serveRoot: '/', // 静态资源根路径
       exclude: ['*'], // 排除所有路由，只有真实静态资源才会被处理
     }),
+    UserModule,
     // ImageGatewayModule, // 引入图片网关模块
   ],
   controllers: [AppController, InitController],
-  providers: [AppService, {
-    provide: APP_FILTER,
-    useClass: HttpExceptionFilter,
-  },
-    SupabaseQueryService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+    SupabaseQueryService,
+  ],
 })
 // export class AppModule { }
 // 动态移除，目前暂时先使用 app.disable('x-powered-by');
