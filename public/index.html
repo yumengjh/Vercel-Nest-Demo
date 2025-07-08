@@ -166,8 +166,8 @@
 
     /* 添加图标样式 */
     .icon {
-      width: 14px;
-      height: 14px;
+      width: 20px;
+      height: 20px;
       fill: rgba(0, 0, 0, 0.25);
     }
 
@@ -208,6 +208,80 @@
     .login-footer a:hover {
       color: #40a9ff;
     }
+
+    .avatar-input-group {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar-preview {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #e8e8e8;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .default-avatar-preview {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+    }
+
+    .default-avatar-preview svg {
+      width: 60%;
+      height: 60%;
+      fill: #bfbfbf;
+    }
+
+    .avatar-error {
+      margin-top: 5px;
+      font-size: 12px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .input-group input {
+      width: 100%;
+      height: 40px;
+      padding: 4px 11px 4px 36px;
+      color: rgba(0, 0, 0, 0.85);
+      font-size: 14px;
+      line-height: 1.5715;
+      background-color: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .input-group input:hover,
+    .form-group select:hover {
+      border-color: #40a9ff;
+    }
+
+    .input-group input:focus,
+    .form-group select:focus {
+      border-color: #40a9ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      outline: none;
+    }
   </style>
 </head>
 
@@ -222,18 +296,18 @@
         <!-- 登录表单 -->
         <form v-if="!isRegisterMode" @submit.prevent="handleLogin" @vue:mounted="validateForm">
           <div class="form-group">
-            <svg class="icon input-prefix-icon" viewBox="64 64 896 896" focusable="false" data-icon="user">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
               <path
-                d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z">
+                d="M512 512c123.52 0 224-100.48 224-224S635.52 64 512 64 288 164.48 288 288s100.48 224 224 224z m0-384c88.22 0 160 71.78 160 160s-71.78 160-160 160-160-71.78-160-160 71.78-160 160-160z m376.97 672.97C841.28 748.64 780.91 708 713.54 684.15 685.55 676.47 656.43 672 627.01 672h-230.02c-29.42 0-58.54 4.47-86.53 12.15-67.37 23.85-127.74 64.49-175.43 116.82-8.85 9.68-8.85 25.03 0 34.71C182.72 883.36 243.09 924 310.46 947.85c27.99 7.68 57.11 12.15 86.53 12.15h230.02c29.42 0 58.54-4.47 86.53-12.15 67.37-23.85 127.74-64.49 175.43-116.82 8.85-9.68 8.85-25.03 0-34.71zM627.01 896h-230.02c-21.86 0-43.49-3.24-64.29-8.85-49.98-17.28-94.92-47.36-134.71-88.15 39.79-40.79 84.73-70.87 134.71-88.15 20.8-5.61 42.43-8.85 64.29-8.85h230.02c21.86 0 43.49 3.24 64.29 8.85 49.98 17.28 94.92 47.36 134.71 88.15-39.79 40.79-84.73 70.87-134.71 88.15-20.8 5.61-42.43 8.85-64.29 8.85z">
               </path>
             </svg>
             <input type="text" id="username" v-model="formData.username" :disabled="loading" @input="validateForm"
               placeholder="用户名" autocomplete="username">
           </div>
           <div class="form-group">
-            <svg class="icon input-prefix-icon" viewBox="64 64 896 896" focusable="false" data-icon="lock">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
               <path
-                d="M832 464h-68V240c0-70.7-57.3-128-128-128H388c-70.7 0-128 57.3-128 128v224h-68c-17.7 0-32 14.3-32 32v384c0 17.7 14.3 32 32 32h640c17.7 0 32-14.3 32-32V496c0-17.7-14.3-32-32-32zM332 240c0-30.9 25.1-56 56-56h248c30.9 0 56 25.1 56 56v224H332V240zm460 600H232V536h560v304zM484 701v53c0 4.4 3.6 8 8 8h40c4.4 0 8-3.6 8-8v-53a48.01 48.01 0 10-56 0z">
+                d="M800 416h-32V304c0-123.52-100.48-224-224-224S320 180.48 320 304v112h-32c-35.2 0-64 28.8-64 64v384c0 35.2 28.8 64 64 64h512c35.2 0 64-28.8 64-64V480c0-35.2-28.8-64-64-64z m-384-112c0-88.22 71.78-160 160-160s160 71.78 160 160v112H416V304z m384 560H288V480h512v384z m-256-272c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32s32-14.33 32-32v-96c0-17.67-14.33-32-32-32z">
               </path>
             </svg>
             <input type="password" id="password" v-model="formData.password" :disabled="loading" @input="validateForm"
@@ -252,16 +326,58 @@
 
         <!-- 注册表单 -->
         <form v-else @submit.prevent="handleRegister">
+          <div class="form-group avatar-input-group">
+            <div class="avatar-preview">
+              <img v-if="registerData.avatar_url" :src="registerData.avatar_url" alt="头像预览" @error="handleAvatarError">
+              <div v-else class="default-avatar-preview">
+                <svg viewBox="0 0 1024 1024">
+                  <path
+                    d="M512 512c123.52 0 224-100.48 224-224S635.52 64 512 64 288 164.48 288 288s100.48 224 224 224z m0-384c88.22 0 160 71.78 160 160s-71.78 160-160 160-160-71.78-160-160 71.78-160 160-160z m376.97 672.97C841.28 748.64 780.91 708 713.54 684.15 685.55 676.47 656.43 672 627.01 672h-230.02c-29.42 0-58.54 4.47-86.53 12.15-67.37 23.85-127.74 64.49-175.43 116.82-8.85 9.68-8.85 25.03 0 34.71C182.72 883.36 243.09 924 310.46 947.85c27.99 7.68 57.11 12.15 86.53 12.15h230.02c29.42 0 58.54-4.47 86.53-12.15 67.37-23.85 127.74-64.49 175.43-116.82 8.85-9.68 8.85-25.03 0-34.71zM627.01 896h-230.02c-21.86 0-43.49-3.24-64.29-8.85-49.98-17.28-94.92-47.36-134.71-88.15 39.79-40.79 84.73-70.87 134.71-88.15 20.8-5.61 42.43-8.85 64.29-8.85h230.02c21.86 0 43.49 3.24 64.29 8.85 49.98 17.28 94.92 47.36 134.71 88.15-39.79 40.79-84.73 70.87-134.71 88.15-20.8 5.61-42.43 8.85-64.29 8.85z">
+                  </path>
+                </svg>
+              </div>
+            </div>
+            <div class="input-group">
+              <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+                <path
+                  d="M847.9 592H152c-17.7 0-32 14.3-32 32v272c0 17.7 14.3 32 32 32h695.9c17.7 0 32-14.3 32-32V624c0-17.7-14.3-32-32-32zM153.5 198.7l148.8-148.8c18.7-18.7 49.1-18.7 67.9 0l167.2 167.2 171.2-171.2c18.7-18.7 49.1-18.7 67.9 0l125.3 125.3c18.7 18.7 18.7 49.1 0 67.9L745 396.7l60 60v-187c0-35.3-28.7-64-64-64H261.9l-108-108c-4.7-4.7-12.3-4.7-17 0L36.3 198.3c-4.7 4.7-4.7 12.3 0 17l117.2 117.2v395.8c0 35.3 28.7 64 64 64h576c35.3 0 64-28.7 64-64V456.7l-60-60-156.5 156.5c-18.7 18.7-49.1 18.7-67.9 0L459.5 459.5 292.3 626.7c-18.7 18.7-49.1 18.7-67.9 0L153.5 555.8V198.7z">
+                </path>
+              </svg>
+              <input type="url" v-model="registerData.avatar_url" :disabled="loading" placeholder="头像图片URL"
+                @input="validateAvatarUrl">
+            </div>
+            <div v-if="avatarError" class="error-message avatar-error">{{ avatarError }}</div>
+          </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M512 512c123.52 0 224-100.48 224-224S635.52 64 512 64 288 164.48 288 288s100.48 224 224 224z m0-384c88.22 0 160 71.78 160 160s-71.78 160-160 160-160-71.78-160-160 71.78-160 160-160z m376.97 672.97C841.28 748.64 780.91 708 713.54 684.15 685.55 676.47 656.43 672 627.01 672h-230.02c-29.42 0-58.54 4.47-86.53 12.15-67.37 23.85-127.74 64.49-175.43 116.82-8.85 9.68-8.85 25.03 0 34.71C182.72 883.36 243.09 924 310.46 947.85c27.99 7.68 57.11 12.15 86.53 12.15h230.02c29.42 0 58.54-4.47 86.53-12.15 67.37-23.85 127.74-64.49 175.43-116.82 8.85-9.68 8.85-25.03 0-34.71zM627.01 896h-230.02c-21.86 0-43.49-3.24-64.29-8.85-49.98-17.28-94.92-47.36-134.71-88.15 39.79-40.79 84.73-70.87 134.71-88.15 20.8-5.61 42.43-8.85 64.29-8.85h230.02c21.86 0 43.49 3.24 64.29 8.85 49.98 17.28 94.92 47.36 134.71 88.15-39.79 40.79-84.73 70.87-134.71 88.15-20.8 5.61-42.43 8.85-64.29 8.85z">
+              </path>
+            </svg>
             <input type="text" v-model="registerData.username" :disabled="loading" placeholder="用户名" required>
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M800 416h-32V304c0-123.52-100.48-224-224-224S320 180.48 320 304v112h-32c-35.2 0-64 28.8-64 64v384c0 35.2 28.8 64 64 64h512c35.2 0 64-28.8 64-64V480c0-35.2-28.8-64-64-64z m-384-112c0-88.22 71.78-160 160-160s160 71.78 160 160v112H416V304z m384 560H288V480h512v384z m-256-272c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32s32-14.33 32-32v-96c0-17.67-14.33-32-32-32z">
+              </path>
+            </svg>
             <input type="password" v-model="registerData.password" :disabled="loading" placeholder="密码" required>
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 656H184V460h656v380zM184 392V256h128v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h256v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h128v136H184z">
+              </path>
+            </svg>
             <input type="email" v-model="registerData.email" :disabled="loading" placeholder="邮箱">
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M512 599.6c-71.7 0-130-58.3-130-130s58.3-130 130-130 130 58.3 130 130-58.3 130-130 130zm0-220c-49.7 0-90 40.3-90 90s40.3 90 90 90 90-40.3 90-90-40.3-90-90-90z">
+              </path>
+            </svg>
             <select v-model="registerData.gender" :disabled="loading">
               <option value="male">男</option>
               <option value="female">女</option>
@@ -269,15 +385,35 @@
             </select>
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372zm32-572h-64v264l192 192 45.3-45.3L544 548.7V312z">
+              </path>
+            </svg>
             <input type="number" v-model="registerData.age" :disabled="loading" placeholder="年龄">
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M880 184H712v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H384v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H144c-17.7 0-32 14.3-32 32v664c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V216c0-17.7-14.3-32-32-32zm-40 656H184V460h656v380zM184 392V256h128v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h256v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h128v136H184z">
+              </path>
+            </svg>
             <input type="text" v-model="registerData.bio" :disabled="loading" placeholder="个人简介">
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M877.1 238.7L770.6 132.3c-12.5-12.5-32.7-12.5-45.2 0L558.3 246.8c-13 13-20.3 30.5-20.3 48.9 0 18.5 7.2 35.8 20.3 48.9l89.6 89.7c13 13 30.4 20.3 48.8 20.3 18.5 0 35.8-7.2 48.8-20.3l114.3-114.9c13-13 20.3-30.4 20.3-48.9 0.1-18.4-7.1-35.7-20.2-48.7zM519.7 377.6l-89.6-89.7c-13-13-30.4-20.3-48.8-20.3-18.5 0-35.8 7.2-48.8 20.3L118.3 502c-13 13-20.3 30.5-20.3 48.9 0 18.5 7.2 35.8 20.3 48.9l89.6 89.7c13 13 30.4 20.3 48.8 20.3 18.5 0 35.8-7.2 48.8-20.3l214.2-214.1c13-13 20.3-30.4 20.3-48.9 0-18.4-7.2-35.7-20.3-48.9z">
+              </path>
+            </svg>
             <input type="tel" v-model="registerData.phone" :disabled="loading" placeholder="手机号码">
           </div>
           <div class="form-group">
+            <svg class="icon input-prefix-icon" viewBox="0 0 1024 1024">
+              <path
+                d="M946.5 505L534.6 93.4c-12.5-12.5-32.7-12.5-45.2 0L77.5 505c-12 12-18.8 28.3-18.8 45.3 0 35.3 28.7 64 64 64h43.4V908c0 17.7 14.3 32 32 32H448V716h112v224h265.9c17.7 0 32-14.3 32-32V614.3h43.4c17 0 33.3-6.7 45.3-18.8 24.9-25 24.9-65.5-0.1-90.5z">
+              </path>
+            </svg>
             <input type="text" v-model="registerData.address" :disabled="loading" placeholder="地址">
           </div>
           <button type="submit" class="btn" :disabled="loading">
@@ -308,9 +444,9 @@
             <div class="avatar-wrapper">
               <img v-if="data.avatar" :src="data.avatar" :alt="data.username" class="user-avatar">
               <div v-else class="default-avatar">
-                <svg viewBox="64 64 896 896" focusable="false" data-icon="user">
+                <svg viewBox="0 0 1024 1024">
                   <path
-                    d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z">
+                    d="M512 512c123.52 0 224-100.48 224-224S635.52 64 512 64 288 164.48 288 288s100.48 224 224 224z m0-384c88.22 0 160 71.78 160 160s-71.78 160-160 160-160-71.78-160-160 71.78-160 160-160z m376.97 672.97C841.28 748.64 780.91 708 713.54 684.15 685.55 676.47 656.43 672 627.01 672h-230.02c-29.42 0-58.54 4.47-86.53 12.15-67.37 23.85-127.74 64.49-175.43 116.82-8.85 9.68-8.85 25.03 0 34.71C182.72 883.36 243.09 924 310.46 947.85c27.99 7.68 57.11 12.15 86.53 12.15h230.02c29.42 0 58.54-4.47 86.53-12.15 67.37-23.85 127.74-64.49 175.43-116.82 8.85-9.68 8.85-25.03 0-34.71zM627.01 896h-230.02c-21.86 0-43.49-3.24-64.29-8.85-49.98-17.28-94.92-47.36-134.71-88.15 39.79-40.79 84.73-70.87 134.71-88.15 20.8-5.61 42.43-8.85 64.29-8.85h230.02c21.86 0 43.49 3.24 64.29 8.85 49.98 17.28 94.92 47.36 134.71 88.15-39.79 40.79-84.73 70.87-134.71 88.15-20.8 5.61-42.43 8.85-64.29 8.85z">
                   </path>
                 </svg>
               </div>
@@ -342,7 +478,7 @@
 
             <div class="info-item">
               <label>最后活跃:</label>
-              <span class="time-text">{{ formatTime(data.last_active_at) }}</span>
+              <span class="time-text">{{ data.last_active_at }}</span>
             </div>
           </div>
         </div>
@@ -535,8 +671,8 @@
   <script>
     const app = Mist.createApp({
       formData: {
-        username: 'zhangsan',
-        password: 'zhangsan'
+        username: '',
+        password: ''
       },
       registerData: {
         username: '',
@@ -556,6 +692,7 @@
       isLogin: false,
       isRegisterMode: false,
       data: {},
+      avatarError: '',
 
       toggleMode() {
         this.isRegisterMode = !this.isRegisterMode;
@@ -566,6 +703,51 @@
       validateForm() {
         this.errorMessage = '';
         this.isValid = this.formData.username.length >= 1 && this.formData.password.length >= 1;
+      },
+
+      validateAvatarUrl() {
+        this.avatarError = '';
+        if (this.registerData.avatar_url) {
+          if (!this.isValidUrl(this.registerData.avatar_url)) {
+            this.avatarError = '请输入有效的图片URL';
+          }
+        }
+      },
+
+      isValidUrl(url) {
+        try {
+          new URL(url);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      handleAvatarError() {
+        this.avatarError = '图片加载失败，请检查URL是否正确';
+        this.registerData.avatar_url = '';
+      },
+
+      handleLogout() {
+        this.isLogin = false;
+        this.data = {};
+        this.errorMessage = '';
+        this.successMessage = '';
+        this.formData = {
+          username: '',
+          password: ''
+        };
+        this.registerData = {
+          username: '',
+          password: '',
+          email: '',
+          gender: 'other',
+          age: null,
+          bio: '',
+          avatar_url: '',
+          phone: '',
+          address: ''
+        }
       },
 
       async handleRegister() {
@@ -619,7 +801,7 @@
           });
 
           const result = await response.json();
-          console.log(response);
+          // console.log(response);
 
           if (result.status != 200) {
             throw new Error(result.message || '登录失败');
