@@ -1,4 +1,5 @@
 import { Scope, HttpException, HttpStatus, Controller, Get, Req, Post, Body, HttpCode, Header, Redirect, Query, Res, Next, Param, Headers, HttpRedirectResponse, HostParam } from '@nestjs/common';
+import { OnModuleInit } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Request, Response, NextFunction } from 'express';
 import { Observable, of } from 'rxjs';
@@ -23,12 +24,28 @@ interface AppConfig {
   path: 'v1',
   scope: Scope.DEFAULT,
 })
-export class AppController {
+export class AppController implements OnModuleInit {
+  private totalQuotesCount: number = 0;
 
   constructor(
     private readonly appService: AppService,
     private readonly supabaseQueryService: SupabaseQueryService,
-  ) {
+  ) { }
+
+  async onModuleInit() {
+    await this.initQuotesCount();
+  }
+
+  private async initQuotesCount() {
+    const result = await this.supabaseQueryService.executeSQL<AppConfig>(
+      'SELECT * FROM motivational_quotes WHERE enable = true'
+    );
+    if (result?.data?.length > 0) {
+      this.totalQuotesCount = result.data.length;
+      console.log(`Initialized quotes count: ${this.totalQuotesCount}`);
+    } else {
+      console.log('No quotes available');
+    }
   }
 
   @Get("a1")
@@ -41,69 +58,26 @@ export class AppController {
 
   @Get('quote')
   @HandleSupabaseQuery({
-    successMessage: '获取励志语录成功',
-    errorMessage: '获取励志语录失败',
+    successMessage: 'Get Success',
+    errorMessage: 'Get Failed',
     defaultErrorStatus: HttpStatus.BAD_REQUEST
   })
   @Throttle({
-    wait: 2000,
-    errorMessage: '查询操作太频繁，请稍后再试',
+    wait: 3000,
+    errorMessage: 'Too Many Requests',
     errorStatus: HttpStatus.TOO_MANY_REQUESTS
   })
-  async getRandomQuote() {
-    const randomId = Math.floor(Math.random() * 100) + 1;
+  async getRandomQuote(@Query('id') id: string) {
+    if (this.totalQuotesCount === 0) {
+      throw new HttpException('No quotes available', HttpStatus.NOT_FOUND);
+    }
+    const randomId = parseInt(id) || Math.floor(Math.random() * this.totalQuotesCount) + 1;
     return await this.supabaseQueryService.executeSQL<AppConfig>(
       `SELECT id, quote FROM motivational_quotes WHERE enable = true AND id = ${randomId}`
     );
   }
 
-  @Get('config')
-  @Throttle({
-    wait: 2000,
-    errorMessage: '查询操作太频繁，请稍后再试',
-    errorStatus: HttpStatus.TOO_MANY_REQUESTS
-  })
-  @HandleSupabaseQuery({
-    successMessage: '获取配置成功',
-    errorMessage: '获取配置失败',
-    defaultErrorStatus: HttpStatus.BAD_REQUEST
-  })
-  async getAppConfig(@Query("key") key: string = 'default_key') {
-    return await this.supabaseQueryService.executeSQL<AppConfig>(
-      `SELECT * FROM app_config where key = '${key}' ORDER BY id ASC`
-    );
-  }
 
-  @Get('insert')
-  @HandleSupabaseQuery({
-    successMessage: '操作成功',
-    errorMessage: '操作失败',
-    defaultErrorStatus: HttpStatus.BAD_REQUEST
-  })
-  async getFilteredConfig(@Query('key') key: string = 'default_key', @Query('value') value: string = 'default_value', @Query('description') description: string = 'default_description') {
-    let sql = `INSERT INTO app_config (key, value, description) VALUES ('${key}', '${value}', '${description}')`;
-    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
-  }
-
-  @Get('delete')
-  @HandleSupabaseQuery({
-    successMessage: '删除成功',
-    errorMessage: '删除失败',
-    defaultErrorStatus: HttpStatus.BAD_REQUEST
-  })
-  async getSpecificFields(@Query("key") key?: string, @Query("id") id?: number) {
-    let sql: string;
-
-    if (id) {
-      sql = `DELETE FROM app_config WHERE id = ${id}`;
-    } else if (key) {
-      sql = `DELETE FROM app_config WHERE key = '${key}'`;
-    } else {
-      throw new HttpException('必须提供key或id参数', HttpStatus.BAD_REQUEST);
-    }
-
-    return await this.supabaseQueryService.executeSQL<AppConfig>(sql);
-  }
 }
 
 
